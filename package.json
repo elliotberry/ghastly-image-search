@@ -18,12 +18,11 @@
   },
   "homepage": "https://github.com/jimkang/g-i-s",
   "devDependencies": {
-    "eslint": "^7.4.0",
-    "tape": "^5.0.1"
+    "eslint": "^7.4.0"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.3",
-    "lodash.flatten": "^4.4.0",
-    "request": "^2.88.2"
+    "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.10",
+    "lodash.flatten": "^4.4.0"
   }
 }

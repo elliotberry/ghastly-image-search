@@ -1,16 +1,16 @@
-var request = require('request');
-var cheerio = require('cheerio');
-var queryString = require('querystring');
-var flatten = require('lodash.flatten');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const queryString = require('querystring');
+const flatten = require('lodash.flatten');
 
-var baseURL = 'http://images.google.com/search?';
+const baseURL = 'http://images.google.com/search?';
 
-var imageFileExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'];
+const imageFileExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'];
 
-function gis(opts, done) {
-  var searchTerm;
-  var queryStringAddition;
-  var filterOutDomains = ['gstatic.com'];
+async function gis(opts) {
+  let searchTerm;
+  let queryStringAddition;
+  const filterOutDomains = ['gstatic.com'];
 
   if (typeof opts === 'string') {
     searchTerm = opts;
@@ -20,7 +20,7 @@ function gis(opts, done) {
     filterOutDomains = filterOutDomains.concat(opts.filterOutDomains);
   }
 
-  var url =
+  const url =
     baseURL +
     queryString.stringify({
       tbm: 'isch',
@@ -36,7 +36,7 @@ function gis(opts, done) {
   if (queryStringAddition) {
     url += queryStringAddition;
   }
-  var reqOpts = {
+  const reqOpts = {
     url: url,
     headers: {
       'User-Agent':
@@ -44,59 +44,52 @@ function gis(opts, done) {
     }
   };
 
-  // console.log(reqOpts.url);
-  request(reqOpts, parseGISResponse);
+  const { data } = await axios.get(reqOpts);
 
-  function parseGISResponse(error, response, body) {
-    if (error) {
-      done(error);
-      return;
-    }
-    var $ = cheerio.load(body);
-    var scripts = $('script');
-    var scriptContents = [];
-    for (var i = 0; i < scripts.length; ++i) {
-      if (scripts[i].children.length > 0) {
-        const content = scripts[i].children[0].data;
-        if (containsAnyImageFileExtension(content)) {
-          scriptContents.push(content);
-        }
-      }
-    }
-
-    done(error, flatten(scriptContents.map(collectImageRefs)));
-
-    function collectImageRefs(content) {
-      var refs = [];
-      var re = /\["(http.+?)",(\d+),(\d+)\]/g;
-      var result;
-      while ((result = re.exec(content)) !== null) {
-        if (result.length > 3) {
-          let ref = {
-            url: result[1],
-            width: +result[3],
-            height: +result[2]
-          };
-          if (domainIsOK(ref.url)) {
-            refs.push(ref);
-          }
-        }
-      }
-      return refs;
-    }
-
-    function domainIsOK(url) {
-      if (!filterOutDomains) {
-        return true;
-      } else {
-        return filterOutDomains.every(skipDomainIsNotInURL);
-      }
-
-      function skipDomainIsNotInURL(skipDomain) {
-        return url.indexOf(skipDomain) === -1;
+  const $ = cheerio.load(data);
+  const scripts = $('script');
+  const scriptContents = [];
+  for (const i = 0; i < scripts.length; ++i) {
+    if (scripts[i].children.length > 0) {
+      const content = scripts[i].children[0].data;
+      if (containsAnyImageFileExtension(content)) {
+        scriptContents.push(content);
       }
     }
   }
+
+  function collectImageRefs(content) {
+    const refs = [];
+    const re = /\["(http.+?)",(\d+),(\d+)\]/g;
+    let result;
+    while ((result = re.exec(content)) !== null) {
+      if (result.length > 3) {
+        let ref = {
+          url: result[1],
+          width: +result[3],
+          height: +result[2]
+        };
+        if (domainIsOK(ref.url)) {
+          refs.push(ref);
+        }
+      }
+    }
+    return refs;
+  }
+
+  function domainIsOK(url) {
+    if (!filterOutDomains) {
+      return true;
+    } else {
+      return filterOutDomains.every(skipDomainIsNotInURL);
+    }
+
+    function skipDomainIsNotInURL(skipDomain) {
+      return url.indexOf(skipDomain) === -1;
+    }
+  }
+
+  return flatten(scriptContents.map(collectImageRefs));
 }
 
 function addSiteExcludePrefix(s) {
@@ -104,7 +97,7 @@ function addSiteExcludePrefix(s) {
 }
 
 function containsAnyImageFileExtension(s) {
-  var lowercase = s.toLowerCase();
+  const lowercase = s.toLowerCase();
   return imageFileExtensions.some(containsImageFileExtension);
 
   function containsImageFileExtension(ext) {
