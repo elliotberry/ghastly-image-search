@@ -1,5 +1,5 @@
 {
-  "name": "risafletcher/g-i-s",
+  "name": "g-i-s",
   "version": "1.0.0",
   "description": "Google Image Search",
   "main": "index.js",
@@ -8,15 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:jimkang/g-i-s.git"
+    "url": "git@github.com:risafletcher/g-i-s.git"
   },
   "keywords": [],
   "author": "Risa Fletcher, Jim Kang",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jimkang/g-i-s/issues"
-  },
-  "homepage": "https://github.com/jimkang/g-i-s",
+  "homepage": "https://github.com/risafletcher/g-i-s",
   "devDependencies": {
     "eslint": "^7.4.0"
   },
