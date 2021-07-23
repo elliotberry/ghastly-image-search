@@ -49,7 +49,7 @@ async function gis(opts) {
   const $ = cheerio.load(data);
   const scripts = $('script');
   const scriptContents = [];
-  for (const i = 0; i < scripts.length; ++i) {
+  for (let i = 0; i < scripts.length; ++i) {
     if (scripts[i].children.length > 0) {
       const content = scripts[i].children[0].data;
       if (containsAnyImageFileExtension(content)) {
