@@ -20,7 +20,7 @@ async function gis(opts) {
     filterOutDomains = filterOutDomains.concat(opts.filterOutDomains);
   }
 
-  const url =
+  let url =
     baseURL +
     queryString.stringify({
       tbm: 'isch',
@@ -64,7 +64,7 @@ async function gis(opts) {
     let result;
     while ((result = re.exec(content)) !== null) {
       if (result.length > 3) {
-        let ref = {
+        const ref = {
           url: result[1],
           width: +result[3],
           height: +result[2]
