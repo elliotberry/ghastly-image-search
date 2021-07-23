@@ -8,13 +8,13 @@ From the original API: Another Google Image Search Node module. The nature of th
 Installation
 ------------
 
-    npm install risafletcher/g-i-s
+    npm install @risafletcher/g-i-s
 
 Usage
 -----
 
 ```javascript
-    const gis = require('g-i-s');
+    const gis = require('@risafletcher/g-i-s');
 
     const fetchNews = async (title) => {
       //  ...
