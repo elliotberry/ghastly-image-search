@@ -37,14 +37,14 @@ async function gis(opts) {
     url += queryStringAddition;
   }
   const reqOpts = {
-    url: url,
+    url,
     headers: {
       'User-Agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
     }
   };
 
-  const { data } = await axios.get(reqOpts);
+  const { data } = await axios(reqOpts);
 
   const $ = cheerio.load(data);
   const scripts = $('script');
