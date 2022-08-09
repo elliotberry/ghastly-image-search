@@ -1,7 +1,7 @@
 g-i-s
 =====
 
-A fork of Jim Kang's `g-i-s` package that uses axios to fetch the data. Additionally, instead of using callbacks, the API returns the requested images.
+A fork of Risa Fletcher's fork of Jim Kang's `g-i-s` package that uses axios to fetch the data. Additionally, instead of using callbacks, the API returns the requested images.
 
 From the original API: Another Google Image Search Node module. The nature of these things is that they eventually break as GIS changes, but this one works as of 2018-06-20.
 
