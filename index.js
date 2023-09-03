@@ -1,63 +1,26 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const queryString = require('querystring');
-const flatten = require('lodash.flatten');
-
-const baseURL = 'http://images.google.com/search?';
-
-const imageFileExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'];
+import cheerio from 'cheerio';
+import queryString from 'querystring';
+import flatten from 'lodash.flatten';
+import fetch from 'node-fetch';
+import fs from 'fs';
 
 async function gis(opts) {
-  let searchTerm;
-  let queryStringAddition;
-  const filterOutDomains = ['gstatic.com'];
+  const baseURL = 'http://images.google.com/search?';
 
-  if (typeof opts === 'string') {
-    searchTerm = opts;
-  } else {
-    searchTerm = opts.searchTerm;
-    queryStringAddition = opts.queryStringAddition;
-    filterOutDomains = filterOutDomains.concat(opts.filterOutDomains);
+  const imageFileExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'];
+  function addSiteExcludePrefix(s) {
+    return `-site:${s}`;
   }
-
-  let url =
-    baseURL +
-    queryString.stringify({
-      tbm: 'isch',
-      q: searchTerm
-    });
-
-  if (filterOutDomains) {
-    url += encodeURIComponent(
-      ' ' + filterOutDomains.map(addSiteExcludePrefix).join(' ')
-    );
-  }
-
-  if (queryStringAddition) {
-    url += queryStringAddition;
-  }
-  const reqOpts = {
-    url,
-    headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
-    }
-  };
-
-  const { data } = await axios(reqOpts);
-
-  const $ = cheerio.load(data);
-  const scripts = $('script');
-  const scriptContents = [];
-  for (let i = 0; i < scripts.length; ++i) {
-    if (scripts[i].children.length > 0) {
-      const content = scripts[i].children[0].data;
-      if (containsAnyImageFileExtension(content)) {
-        scriptContents.push(content);
-      }
+  
+  function containsAnyImageFileExtension(s) {
+    const lowercase = s.toLowerCase();
+    return imageFileExtensions.some(containsImageFileExtension);
+  
+    function containsImageFileExtension(ext) {
+      return lowercase.includes(ext);
     }
   }
-
+  
   function collectImageRefs(content) {
     const refs = [];
     const re = /\["(http.+?)",(\d+),(\d+)\]/g;
@@ -67,7 +30,7 @@ async function gis(opts) {
         const ref = {
           url: result[1],
           width: +result[3],
-          height: +result[2]
+          height: +result[2],
         };
         if (domainIsOK(ref.url)) {
           refs.push(ref);
@@ -85,24 +48,57 @@ async function gis(opts) {
     }
 
     function skipDomainIsNotInURL(skipDomain) {
-      return url.indexOf(skipDomain) === -1;
+      return !url.includes(skipDomain);
+    }
+  }
+  let searchTerm;
+  let queryStringAddition;
+  const filterOutDomains = ['gstatic.com'];
+
+  if (typeof opts === 'string') {
+    searchTerm = opts;
+  } else {
+    searchTerm = opts.searchTerm;
+    queryStringAddition = opts.queryStringAddition;
+    filterOutDomains = filterOutDomains.concat(opts.filterOutDomains);
+  }
+
+  let url =
+    baseURL +
+    queryString.stringify({
+      tbm: 'isch',
+      q: searchTerm,
+    });
+
+  if (queryStringAddition) {
+    url += queryStringAddition;
+  }
+  const reqOpts = {
+    headers: {
+      'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+    },
+  };
+
+  const res = await fetch(url, reqOpts); // Sending the request
+  const data = await res.text(); // Parsing the response as JSON
+  fs.writeFileSync('data.html', data);
+  const $ = cheerio.load(data);
+  console.log('data', $);
+  const scripts = $('script');
+  console.log('scripts', scripts);
+  const scriptContents = [];
+  for (let i = 0; i < scripts.length; ++i) {
+    if (scripts[i].children.length > 0) {
+      const content = scripts[i].children[0].data;
+      if (containsAnyImageFileExtension(content)) {
+        scriptContents.push(content);
+      }
     }
   }
 
   return flatten(scriptContents.map(collectImageRefs));
 }
 
-function addSiteExcludePrefix(s) {
-  return '-site:' + s;
-}
 
-function containsAnyImageFileExtension(s) {
-  const lowercase = s.toLowerCase();
-  return imageFileExtensions.some(containsImageFileExtension);
 
-  function containsImageFileExtension(ext) {
-    return lowercase.includes(ext);
-  }
-}
-
-module.exports = gis;
+export default gis;

@@ -1,25 +1,50 @@
 {
-  "name": "@risafletcher/g-i-s",
+  "name": "GIS",
   "version": "1.0.0",
-  "description": "Google Image Search",
+  "description": "Node Image Search",
   "main": "index.js",
   "scripts": {
     "test": "make test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:risafletcher/g-i-s.git"
-  },
+  "type": "module",
   "keywords": [],
-  "author": "Risa Fletcher, Jim Kang",
+  "author": "Elliot Berry, Risa Fletcher, Jim Kang",
   "license": "MIT",
-  "homepage": "https://github.com/risafletcher/g-i-s",
   "devDependencies": {
     "eslint": "^7.4.0"
   },
   "dependencies": {
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.10",
-    "lodash.flatten": "^4.4.0"
+    "lodash.flatten": "^4.4.0",
+    "node-fetch": "^3.3.2"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "commonjs": true,
+      "es6": true
+    },
+    "sourceType": "module",
+    "extends": "eslint:recommended",
+    "rules": {
+      "indent": [
+        "error",
+        2
+      ],
+      "linebreak-style": [
+        "error",
+        "unix"
+      ],
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "semi": [
+        "error",
+        "always"
+      ],
+      "no-console": "off"
+    }
   }
 }
