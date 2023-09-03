@@ -3,25 +3,55 @@ import queryString from 'querystring';
 import flatten from 'lodash.flatten';
 import fetch from 'node-fetch';
 
+//to be a tiny bit secret like a moron: https://stackoverflow.com/questions/14458819/simplest-way-to-obfuscate-and-deobfuscate-a-string-in-javascript
+String.prototype.obfs = function(key, n = 126) {
+ // return String itself if the given parameters are invalid
+ if (!(typeof(key) === 'number' && key % 1 === 0)
+   || !(typeof(key) === 'number' && key % 1 === 0)) {
+   return this.toString();
+ }
+
+ var chars = this.toString().split('');
+
+ for (var i = 0; i < chars.length; i++) {
+   var c = chars[i].charCodeAt(0);
+
+   if (c <= n) {
+     chars[i] = String.fromCharCode((chars[i].charCodeAt(0) + key) % n);
+   }
+ }
+
+ return chars.join('');
+};
+String.prototype.defs = function(key=22, n = 126) {
+  // return String itself if the given parameters are invalid
+  if (!(typeof(key) === 'number' && key % 1 === 0)
+    || !(typeof(key) === 'number' && key % 1 === 0)) {
+    return this.toString();
+  }
+
+  return this.toString().obfs(n - key);
+};
+
 
 async function gis(opts) {
-  const baseURL = 'http://images.google.com/search?';
+  const baseURL = '\x00\f\f\bPEE\x01\x05w}{\vD}\x07\x07}\x04{Dy\x07\x05E\v{w\ny\x00U';
 
   const imageFileExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'];
   let searchTerm;
   let queryStringAddition;
-  const filterOutDomains = ['gstatic.com'];
+  const filterOutDomains = ['}\v\fw\f\x01yDy\x07\x05'.defs()];
 
   if (typeof opts === 'string') {
     searchTerm = opts;
   } else {
     searchTerm = opts.searchTerm;
     queryStringAddition = opts.queryStringAddition;
-    filterOutDomains = filterOutDomains.concat(opts.filterOutDomains);
+    filterOutDomains = [...filterOutDomains, ...opts.filterOutDomains];
   }
   
   let url =
-    baseURL +
+    baseURL.defs() +
     queryString.stringify({
       tbm: 'isch',
       q: searchTerm,
