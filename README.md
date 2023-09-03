@@ -1,5 +1,6 @@
-g-i-s
+GIS
 =====
+*ghastly image search*
 
 A fork of Risa Fletcher's fork of Jim Kang's `g-i-s` package (whew, lad) that uses axios to fetch the data. Additionally, instead of using callbacks, the API returns the requested images.
 
@@ -8,7 +9,7 @@ Works as of aug 2023. There are no certainties in life, and especially, with ill
 Installation
 ------------
 
-    yarn add elliotberry/g-i-s
+    yarn add elliotberry/GIS
 
 Usage
 -----
