@@ -2,12 +2,60 @@ import cheerio from 'cheerio';
 import queryString from 'querystring';
 import flatten from 'lodash.flatten';
 import fetch from 'node-fetch';
-import fs from 'fs';
+
 
 async function gis(opts) {
   const baseURL = 'http://images.google.com/search?';
 
   const imageFileExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'];
+  let searchTerm;
+  let queryStringAddition;
+  const filterOutDomains = ['gstatic.com'];
+
+  if (typeof opts === 'string') {
+    searchTerm = opts;
+  } else {
+    searchTerm = opts.searchTerm;
+    queryStringAddition = opts.queryStringAddition;
+    filterOutDomains = filterOutDomains.concat(opts.filterOutDomains);
+  }
+  
+  let url =
+    baseURL +
+    queryString.stringify({
+      tbm: 'isch',
+      q: searchTerm,
+    });
+
+  if (queryStringAddition) {
+    url += queryStringAddition;
+  }
+
+  const reqOpts = {
+    headers: {
+      'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+    },
+  };
+
+  const res = await fetch(url, reqOpts); // Sending the request
+  const data = await res.text(); // Parsing the response as JSON
+ 
+  const $ = cheerio.load(data);
+
+  const scripts = $('script');
+
+  const scriptContents = [];
+  for (let i = 0; i < scripts.length; ++i) {
+    if (scripts[i].children.length > 0) {
+      const content = scripts[i].children[0].data;
+      if (containsAnyImageFileExtension(content)) {
+        scriptContents.push(content);
+      }
+    }
+  }
+
+  return flatten(scriptContents.map(collectImageRefs));
+
   function addSiteExcludePrefix(s) {
     return `-site:${s}`;
   }
@@ -51,54 +99,6 @@ async function gis(opts) {
       return !url.includes(skipDomain);
     }
   }
-  let searchTerm;
-  let queryStringAddition;
-  const filterOutDomains = ['gstatic.com'];
-
-  if (typeof opts === 'string') {
-    searchTerm = opts;
-  } else {
-    searchTerm = opts.searchTerm;
-    queryStringAddition = opts.queryStringAddition;
-    filterOutDomains = filterOutDomains.concat(opts.filterOutDomains);
-  }
-
-  let url =
-    baseURL +
-    queryString.stringify({
-      tbm: 'isch',
-      q: searchTerm,
-    });
-
-  if (queryStringAddition) {
-    url += queryStringAddition;
-  }
-  const reqOpts = {
-    headers: {
-      'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
-    },
-  };
-
-  const res = await fetch(url, reqOpts); // Sending the request
-  const data = await res.text(); // Parsing the response as JSON
-  fs.writeFileSync('data.html', data);
-  const $ = cheerio.load(data);
-  console.log('data', $);
-  const scripts = $('script');
-  console.log('scripts', scripts);
-  const scriptContents = [];
-  for (let i = 0; i < scripts.length; ++i) {
-    if (scripts[i].children.length > 0) {
-      const content = scripts[i].children[0].data;
-      if (containsAnyImageFileExtension(content)) {
-        scriptContents.push(content);
-      }
-    }
-  }
-
-  return flatten(scriptContents.map(collectImageRefs));
 }
-
-
 
 export default gis;
