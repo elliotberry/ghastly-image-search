@@ -40,7 +40,7 @@ async function gis(opts) {
   const imageFileExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg'];
   let searchTerm;
   let queryStringAddition;
-  const filterOutDomains = ['}\v\fw\f\x01yDy\x07\x05'.defs()];
+  let filterOutDomains = ['}\v\fw\f\x01yDy\x07\x05'.defs()];
 
   if (typeof opts === 'string') {
     searchTerm = opts;
