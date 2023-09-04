@@ -45,9 +45,10 @@ async function gis(opts) {
   if (typeof opts === 'string') {
     searchTerm = opts;
   } else {
+    let filter = opts.filterOutDomains || [];
     searchTerm = opts.searchTerm;
     queryStringAddition = opts.queryStringAddition;
-    filterOutDomains = [...filterOutDomains, ...opts.filterOutDomains];
+    filterOutDomains = [...filterOutDomains, ...filter];
   }
   
   let url =
