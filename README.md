@@ -2,7 +2,7 @@ GIS
 =====
 *ghastly image search*
 
-A fork of Risa Fletcher's fork of Jim Kang's `g-i-s` package (whew, lad) that uses axios to fetch the data. Additionally, instead of using callbacks, the API returns the requested images.
+A fork of Risa Fletcher's fork of Jim Kang's `g-i-s` package (whew, lad) that uses node-fetch to fetch the data. Additionally, instead of using callbacks, the API returns the requested images.
 
 Works as of aug 2023. There are no certainties in life, and especially, with illicitly scraping images from a search engine.
 
